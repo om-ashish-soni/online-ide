@@ -26,12 +26,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { useCookies } from 'react-cookie';
 function App() {
-  const [lang, setLang] = useState('c_cpp');
+  const [lang, setLang] = useState('python');
   const [theme, setTheme] = useState('monokai');
   const [cookies, setCookie] = useCookies();
   const [isRunning, setIsRunning] = useState(false)
   const [isAddNewFile, setIsAddNewFile] = useState(false);
   const [currFileName, setCurrFileName] = useState('default.py');
+  const [isLangUpdated,setIsLangUpdated]=useState(true);
   const newFileName = useRef();
   const ThemesList =
     [
@@ -58,8 +59,10 @@ function App() {
   const [isFileList, setIsFileList] = useState(true);
   const [FileList, setFileList] = useState(['default.py'])
   useEffect(() => {
-
+    console.log("in useeffect")
+    
     // localStorage.removeItem('FileList')
+    // setIsLangUpdated(false);
     if (localStorage.getItem('FileList')) {
       console.log("FileList", JSON.parse(localStorage.getItem("FileList")))
       setFileList(JSON.parse(localStorage.getItem("FileList")))
@@ -72,22 +75,35 @@ function App() {
       localStorage.setItem('currFileName', currFileName);
     }
     // setLang(cookies.lang?cookies.lang:'c_cpp');
-    setLang(localStorage.getItem('lang') ? localStorage.getItem('lang') : 'c_cpp');
+    if (localStorage.getItem('lang')) {
+      setLang(localStorage.getItem('lang'))
+    } else {
+      localStorage.setItem('lang', lang)
+    }
+    // setLang(localStorage.getItem('lang') ? localStorage.getItem('lang') : 'c_cpp');
     // setTheme(cookies.theme?cookies.theme:'monokai');
-    setTheme(localStorage.getItem('theme') ? localStorage.getItem('theme') : 'monokai');
+    if (localStorage.getItem('theme')) {
+      setLang(localStorage.getItem('theme'))
+    } else {
+      localStorage.setItem('theme', theme)
+    }
+    // setTheme(localStorage.getItem('theme') ? localStorage.getItem('theme') : 'monokai');
     console.log("localStorage.lang", localStorage.getItem('lang'));
     console.log("localStorage.theme", localStorage.getItem('theme'));
     inpRef.current.value = (localStorage.getItem('input') ? localStorage.getItem('input') : '');
     opRef.current.value = (localStorage.getItem('output') ? localStorage.getItem('output') : '');
-
+    
     setTimeout(() => {
 
       console.log(lang);
       console.log(theme);
       console.log('localStorage input', localStorage.getItem('input'));
       console.log('localStorage output', localStorage.getItem('output'));
-      if (localStorage.getItem('currFileName') === 'default.any') {
-        switch (localStorage.getItem('lang') ? localStorage.getItem('lang') : "c_cpp") {
+      if (localStorage.getItem('currFileName') === 'default.py') {
+        if(localStorage.getItem('lang')==null){
+          localStorage.setItem(lang)
+        }
+        switch (localStorage.getItem('lang') ? localStorage.getItem('lang') : lang) {
           case 'c_cpp':
             codeRef.current.editor.setValue(localStorage.getItem('c_cpp') ? localStorage.getItem('c_cpp') : '')
             break;
@@ -108,7 +124,8 @@ function App() {
         console.log("local storage buffer of" + localStorage.getItem('currFileName') + " is " + localStorage.getItem(localStorage.getItem('currFileName')))
         codeRef.current.editor.setValue(localStorage.getItem(localStorage.getItem('currFileName')) ? localStorage.getItem(localStorage.getItem('currFileName')) : '')
       }
-
+      setIsLangUpdated(true);
+      switchFile('default.py')
       console.log('currFileName', localStorage.getItem('currFileName'));
     }, 500)
 
@@ -119,7 +136,7 @@ function App() {
   }, [])
   const updateCode = () => {
     // setCookie(lang,codeRef.current.editor.getValue());
-    if (currFileName === 'default.any') {
+    if (currFileName === 'default.py') {
       console.log("lang ", lang)
       localStorage.setItem(lang, codeRef.current.editor.getValue())
       setTimeout(() => console.log(localStorage.getItem(lang)), 500)
@@ -248,12 +265,6 @@ function App() {
       .then(res => res.json())
       .then(res => {
         console.log(res);
-        console.log({
-          "output": "ssv\n",
-          "statusCode": 200,
-          "memory": "7524",
-          "cpuTime": "0.01"
-        });
         setIsRunning(false);
         localStorage.setItem('output', res.output);
         opRef.current.value = res.output;
@@ -319,7 +330,7 @@ function App() {
     setIsFileList(false);
     setTimeout(() => {
       setIsFileList(true);
-      switchFile('default.any')
+      switchFile('default.py')
       console.log(FileList);
       localStorage.setItem("FileList", JSON.stringify(FileList));
     }, 500);
@@ -330,8 +341,8 @@ function App() {
     localStorage.setItem('currFileName', FileToBeSwitched);
     localStorage.setItem('ext', FileToBeSwitched.split('.')[1]);
     setTimeout(() => {
-      if (localStorage.getItem('currFileName') === 'default.any') {
-        console.log("lang in default.any", lang);
+      if (localStorage.getItem('currFileName') === 'default.py') {
+        console.log("lang in default.py", lang);
         switch (localStorage.getItem('lang')) {
           case 'c_cpp':
             console.log("cookie ", localStorage.getItem("c_cpp"))
@@ -360,8 +371,42 @@ function App() {
       }
     }, 500)
   }
-  const createNewFile=(e)=>{
-    let fileName=window.prompt("Enter file name : ")
+  const switchLang=(thisLang)=>{
+    console.log(thisLang);
+    setLang(thisLang);
+    
+    // setCookie("lang",e.target.value);
+    localStorage.setItem("lang", thisLang);
+    setTimeout(() => {
+      switch (thisLang) {
+        case 'c_cpp':
+          console.log("cookie ", localStorage.getItem("c_cpp"))
+          codeRef.current.editor.setValue((localStorage.getItem("c_cpp")) ? (localStorage.getItem("c_cpp")) : (''))
+          break;
+        case 'python':
+          console.log("cookie ", localStorage.getItem("python"))
+          codeRef.current.editor.setValue((localStorage.getItem("python")) ? (localStorage.getItem("python")) : (''))
+          break;
+        case 'java':
+          console.log("cookie ", localStorage.getItem("java"))
+          codeRef.current.editor.setValue((localStorage.getItem("java")) ? (localStorage.getItem("java")) : (''))
+          break;
+        case 'javascript':
+          console.log("cookie ", localStorage.getItem("javascript"))
+          codeRef.current.editor.setValue((localStorage.getItem("javascript")) ? (localStorage.getItem("javascript")) : (''))
+          break;
+
+        default:
+          break;
+
+      }
+      console.log(`language = ${lang}`)
+    }, 500)
+
+    
+  }
+  const createNewFile = (e) => {
+    let fileName = window.prompt("Enter file name : ")
     console.log(fileName)
     const arrayOfTwo = fileName.split('.');
     console.log(arrayOfTwo);
@@ -381,8 +426,16 @@ function App() {
     FileList.push(fileName);
     setIsFileList(false);
     setIsAddNewFile(false);
-
-    setTimeout(() => { setIsFileList(true); switchFile(fileName); console.log(FileList); setFileList(FileList); localStorage.setItem("FileList", JSON.stringify(FileList)); }, 500);
+    if(ext=='c' || ext=='cpp' || ext=='c_cpp') switchLang('c_cpp')
+    else if(ext=='java') switchLang('java')
+    else if(ext=='py') switchLang('python')
+    else {
+      window.alert('not a valid language')
+    }
+    setTimeout(() => {
+      setIsFileList(true); switchFile(fileName); console.log(FileList); setFileList(FileList); localStorage.setItem("FileList", JSON.stringify(FileList));
+      localStorage.setItem("FileList", JSON.stringify(FileList));
+    }, 500);
 
   }
   return (
@@ -394,17 +447,18 @@ function App() {
             <span className="titleHead">Om's Online Ide</span>
 
             {
-              (localStorage.getItem('currFileName') === 'default.py') ?
+              (false) ?
                 <select className="lang" onChange={changeLang}>
                   {
-                    (localStorage.getItem('lang')) ?
-                      <option id="currentLang">{localStorage.getItem('lang')}</option> :
+                    (currFileName) ?
+                      <option id="currentFileName">{currFileName}</option> :
                       null
                   }
                   {
                     LangList.map((LangName) => {
+
                       return (
-                        (localStorage.getItem('lang') !== LangName) ?
+                        (localStorage.getItem('lang') !== LangName && lang !== LangName) ?
                           <option id={LangName}>{LangName}</option> :
                           null
                       )
@@ -415,27 +469,31 @@ function App() {
                 :
                 <button className='lang'>{currFileName.split('.')[1]}</button>
             }
-          <select className="files">
-          {
-                (localStorage.getItem('theme')) ?
-                  <option id="currentFile">{localStorage.getItem('currFileName')}</option> :
-                  null
+            <select className="files">
+
+              {
+                (isFileList) ?
+                <>
+                  {
+                  (currFileName) ?
+                    <option id="currentFile">{currFileName}</option> :
+                    <option id="currentFile">default.py</option>
+                  }
+                  {
+                    FileList.map((FileName) => {
+                      return (
+                        // <option className="elemNav">
+                        (currFileName == FileName || currFileName=="default.py") ?
+                        null : <option style={{ "float": "left", "width": "70%" }} className={(currFileName === FileName) ? ("activeClass") : ("fileClass")} onClick={() => switchFile(FileName)} disabled={FileName === currFileName}>{FileName}</option>
+                      )
+                    }) 
+                  }
+                  
+                  </>
+                  :
+              null
               }
-            {
-              (isFileList) ?
-                FileList.map((FileName) => {
-                  return (
-                    // <option className="elemNav">
-                    (currFileName === FileName)?
-                    null:<option style={{ "float": "left", "width": "70%" }} className={(currFileName === FileName) ? ("activeClass") : ("fileClass")} onClick={() => switchFile(FileName)} disabled={FileName === currFileName}>{FileName}</option>
-                    
-                      // <button style={{ "margin-left": "0px", "width": "22%" }} className="deleteClass" onClick={() => deleteFile(FileName)} disabled={(FileName === 'default.any')}> x </button>
-                    // </option>
-                  )
-                }) :
-                null
-            }
-          </select>
+            </select>
 
             <select className="theme" onChange={changeTheme}>
               {
@@ -453,12 +511,12 @@ function App() {
                   )
                 })
               }
-          
+
               {/* </div> */}
 
 
             </select>
-            
+
             {
               isRunning ?
 
@@ -471,7 +529,7 @@ function App() {
                 </button>
             }
             <button className="addFileClass" onClick={createNewFile}> add new file </button>
-              {/* {
+            {/* {
                   isAddNewFile ?
                       <form className="addNewFileForm" onSubmit={handleCreateFileSubmit}>
                         <input type="text" placeholder={`filename.ext`} ref={newFileName} />
@@ -484,7 +542,9 @@ function App() {
         </div>
       </div>
       <div className='editorclass'>
-        <AceEditor
+        {
+          isLangUpdated?
+          <AceEditor
           ref={codeRef}
           onChange={updateCode}
           mode={lang}
@@ -496,50 +556,54 @@ function App() {
           fontSize="1.8vw"
           height="44vw"
         />
-      </div>
-    <div className="container">
-      <div className="container">
-        <div>
-          {
-            isRunning ?
-              <span>
-                <img src={loadingLogo} alt="" className="loadingLogo" />
-                Running ....
-              </span> :
-              <button className="run" onClick={fetchOutput}>
-                Run Code
-              </button>
-          }
-        </div>
+          :
+          <h1>"Loading ....."</h1>
+        }
+        
       </div>
       <div className="container">
-        <div className="inp" >
-          <h4>Input:</h4>
-          <textarea ref={inpRef} id="inpText" className="inpText" placeholder="write default input here...">
-
-          </textarea>
+        <div className="container">
+          <div>
+            {
+              isRunning ?
+                <span>
+                  <img src={loadingLogo} alt="" className="loadingLogo" />
+                  Running ....
+                </span> :
+                <button className="run" onClick={fetchOutput}>
+                  Run Code
+                </button>
+            }
+          </div>
         </div>
-        <div className="Op">
-          <h4> Output:</h4>
-          <textarea ref={opRef} placeholder="output will be displayed here.." className="opText">
+        <div className="container">
+          <div className="inp" >
+            <h4>Input:</h4>
+            <textarea ref={inpRef} id="inpText" className="inpText" placeholder="write default input here...">
 
-          </textarea>
+            </textarea>
+          </div>
+          <div className="Op">
+            <h4> Output:</h4>
+            <textarea ref={opRef} placeholder="output will be displayed here.." className="opText">
+
+            </textarea>
+          </div>
+          <div className="Op">
+            <h4> Time:</h4>
+            <textarea ref={tmRef} placeholder="CPU run time will be displayed here.." className="opText">
+
+            </textarea>
+          </div>
+          <div className="Op">
+            <h4> memory:</h4>
+            <textarea ref={memRef} placeholder="CPU Memory usage will be displayed here.." className="opText">
+
+            </textarea>
+          </div>
+
         </div>
-        <div className="Op">
-          <h4> Time:</h4>
-          <textarea ref={tmRef} placeholder="CPU run time will be displayed here.." className="opText">
-
-          </textarea>
-        </div>
-        <div className="Op">
-          <h4> memory:</h4>
-          <textarea ref={memRef} placeholder="CPU Memory usage will be displayed here.." className="opText">
-
-          </textarea>
-        </div>
-
       </div>
-    </div>
     </div >
   );
 }
