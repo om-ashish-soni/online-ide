@@ -321,6 +321,8 @@ function App() {
     setIsFileList(false);
     setIsAddNewFile(false);
 
+
+    
     setTimeout(() => { setIsFileList(true); switchFile(fileName); console.log(FileList); setFileList(FileList); localStorage.setItem("FileList", JSON.stringify(FileList)); }, 500);
 
   }
