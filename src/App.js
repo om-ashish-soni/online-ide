@@ -322,7 +322,7 @@ function App() {
     setIsAddNewFile(false);
 
 
-    
+
     setTimeout(() => { setIsFileList(true); switchFile(fileName); console.log(FileList); setFileList(FileList); localStorage.setItem("FileList", JSON.stringify(FileList)); }, 500);
 
   }
@@ -485,7 +485,7 @@ function App() {
                     FileList.map((FileName) => {
                       return (
                         // <option className="elemNav">
-                        (currFileName == FileName || currFileName=="default.py") ?
+                        (currFileName == FileName || FileName=="default.py") ?
                         null : <option style={{ "float": "left", "width": "70%" }} className={(currFileName === FileName) ? ("activeClass") : ("fileClass")} onClick={() => switchFile(FileName)} disabled={FileName === currFileName}>{FileName}</option>
                       )
                     }) 
