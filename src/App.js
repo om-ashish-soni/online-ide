@@ -1,6 +1,8 @@
 import logo from './logocc.PNG';
 import loadingLogo from './loading.png';
 import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/ext-language_tools"
+
 import './App.css';
 import "ace-builds/src-noconflict/mode-powershell";
 import "ace-builds/src-noconflict/mode-sh";
@@ -557,6 +559,11 @@ function App() {
           style={{ "float": "left" }}
           fontSize="1.8vw"
           height="44vw"
+          setOptions={{
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true
+          }}
         />
           :
           <h1>"Loading ....."</h1>
