@@ -1,7 +1,13 @@
 import logo from './logocc.PNG';
 import loadingLogo from './loading.png';
 import AceEditor from "react-ace";
+
+
+
+
 import "ace-builds/src-noconflict/ext-language_tools"
+
+
 
 import './App.css';
 import "ace-builds/src-noconflict/mode-powershell";
@@ -64,7 +70,7 @@ function App() {
     console.log("in useeffect")
     
     // localStorage.removeItem('FileList')
-    // setIsLangUpdated(false);
+    
     if (localStorage.getItem('FileList')) {
       console.log("FileList", JSON.parse(localStorage.getItem("FileList")))
       setFileList(JSON.parse(localStorage.getItem("FileList")))
@@ -85,7 +91,7 @@ function App() {
     // setLang(localStorage.getItem('lang') ? localStorage.getItem('lang') : 'c_cpp');
     // setTheme(cookies.theme?cookies.theme:'monokai');
     if (localStorage.getItem('theme')) {
-      setLang(localStorage.getItem('theme'))
+      setTheme(localStorage.getItem('theme'))
     } else {
       localStorage.setItem('theme', theme)
     }
@@ -101,7 +107,7 @@ function App() {
       console.log(theme);
       console.log('localStorage input', localStorage.getItem('input'));
       console.log('localStorage output', localStorage.getItem('output'));
-      if (localStorage.getItem('currFileName') === 'default.py') {
+      if (false && localStorage.getItem('currFileName') === 'default.py') {
         if(localStorage.getItem('lang')==null){
           localStorage.setItem(lang)
         }
@@ -124,13 +130,14 @@ function App() {
         }
       } else {
         console.log("local storage buffer of" + localStorage.getItem('currFileName') + " is " + localStorage.getItem(localStorage.getItem('currFileName')))
+        switchLang(convertExtToLang(currFileName.split(".")[1]))
         codeRef.current.editor.setValue(localStorage.getItem(localStorage.getItem('currFileName')) ? localStorage.getItem(localStorage.getItem('currFileName')) : '')
       }
-      setIsLangUpdated(true);
+      
       switchFile('default.py')
       console.log('currFileName', localStorage.getItem('currFileName'));
     }, 500)
-
+    setIsLangUpdated(true);
 
     return () => {
 
@@ -138,7 +145,7 @@ function App() {
   }, [])
   const updateCode = () => {
     // setCookie(lang,codeRef.current.editor.getValue());
-    if (currFileName === 'default.py') {
+    if (false && currFileName === 'default.py') {
       console.log("lang ", lang)
       localStorage.setItem(lang, codeRef.current.editor.getValue())
       setTimeout(() => console.log(localStorage.getItem(lang)), 500)
@@ -163,6 +170,7 @@ function App() {
       console.log("currFileName", currFileName);
       console.log("update buffer : ", localStorage.getItem(currFileName));
       localStorage.setItem(currFileName, codeRef.current.editor.getValue())
+      // codeRef.current.editor.setValue(localStorage.getItem(currFileName))
     }
 
   }
@@ -244,6 +252,8 @@ function App() {
     console.log("going to fetch output")
     // console.log(codeRef.current.editor.getValue());
     // setCookie('input',inpRef.current.value);
+    localStorage.setItem(currFileName, codeRef.current.editor.getValue())
+
     localStorage.setItem('input', inpRef.current.value);
     // const url = "https://api.jdoodle.com/v1/execute";
     const url = "https://aharnish-api.herokuapp.com/ide/execute"
@@ -322,7 +332,8 @@ function App() {
     FileList.push(fileName);
     setIsFileList(false);
     setIsAddNewFile(false);
-
+    setLang(convertExtToLang(ext))
+    console.log(ext,lang)
 
 
     setTimeout(() => { setIsFileList(true); switchFile(fileName); console.log(FileList); setFileList(FileList); localStorage.setItem("FileList", JSON.stringify(FileList)); }, 500);
@@ -339,13 +350,19 @@ function App() {
       localStorage.setItem("FileList", JSON.stringify(FileList));
     }, 500);
   }
+  const convertExtToLang=(ext)=>{
+    if(ext=='c' || ext=='cpp' || ext=='c_cpp') return 'c_cpp'
+    else if(ext=='java') return 'java'
+    else if(ext=='py') return 'python'
+  }
+  
   const switchFile = (FileToBeSwitched) => {
     console.log("switch file clicked", FileToBeSwitched);
     setCurrFileName(FileToBeSwitched);
     localStorage.setItem('currFileName', FileToBeSwitched);
     localStorage.setItem('ext', FileToBeSwitched.split('.')[1]);
     setTimeout(() => {
-      if (localStorage.getItem('currFileName') === 'default.py') {
+      if (false && localStorage.getItem('currFileName') === 'default.py') {
         console.log("lang in default.py", lang);
         switch (localStorage.getItem('lang')) {
           case 'c_cpp':
@@ -371,42 +388,50 @@ function App() {
         }
       } else {
         console.log("buffer ", localStorage.getItem(localStorage.getItem('currFileName')))
-        codeRef.current.editor.setValue(localStorage.getItem(localStorage.getItem('currFileName')) ? localStorage.getItem(localStorage.getItem('currFileName')) : '')
+        // setIsLangUpdated(false);
+        
+        switchLang(convertExtToLang(FileToBeSwitched.split('.')[1]))
+        console.log(lang," vs ",FileToBeSwitched.split('.')[1])
+        codeRef.current.editor.setValue(localStorage.getItem(localStorage.getItem('currFileName')))
       }
     }, 500)
+    
   }
   const switchLang=(thisLang)=>{
+    setIsLangUpdated(false);
     console.log(thisLang);
+    
     setLang(thisLang);
     
     // setCookie("lang",e.target.value);
     localStorage.setItem("lang", thisLang);
-    setTimeout(() => {
-      switch (thisLang) {
-        case 'c_cpp':
-          console.log("cookie ", localStorage.getItem("c_cpp"))
-          codeRef.current.editor.setValue((localStorage.getItem("c_cpp")) ? (localStorage.getItem("c_cpp")) : (''))
-          break;
-        case 'python':
-          console.log("cookie ", localStorage.getItem("python"))
-          codeRef.current.editor.setValue((localStorage.getItem("python")) ? (localStorage.getItem("python")) : (''))
-          break;
-        case 'java':
-          console.log("cookie ", localStorage.getItem("java"))
-          codeRef.current.editor.setValue((localStorage.getItem("java")) ? (localStorage.getItem("java")) : (''))
-          break;
-        case 'javascript':
-          console.log("cookie ", localStorage.getItem("javascript"))
-          codeRef.current.editor.setValue((localStorage.getItem("javascript")) ? (localStorage.getItem("javascript")) : (''))
-          break;
+    // setTimeout(() => {
+    //   switch (thisLang) {
+    //     case 'c_cpp':
+    //       console.log("cookie ", localStorage.getItem("c_cpp"))
+    //       codeRef.current.editor.setValue((localStorage.getItem("c_cpp")) ? (localStorage.getItem("c_cpp")) : (''))
+    //       break;
+    //     case 'python':
+    //       console.log("cookie ", localStorage.getItem("python"))
+    //       codeRef.current.editor.setValue((localStorage.getItem("python")) ? (localStorage.getItem("python")) : (''))
+    //       break;
+    //     case 'java':
+    //       console.log("cookie ", localStorage.getItem("java"))
+    //       codeRef.current.editor.setValue((localStorage.getItem("java")) ? (localStorage.getItem("java")) : (''))
+    //       break;
+    //     case 'javascript':
+    //       console.log("cookie ", localStorage.getItem("javascript"))
+    //       codeRef.current.editor.setValue((localStorage.getItem("javascript")) ? (localStorage.getItem("javascript")) : (''))
+    //       break;
 
-        default:
-          break;
+    //     default:
+    //       break;
 
-      }
-      console.log(`language = ${lang}`)
-    }, 500)
-
+    //   }
+    //   console.log(`language = ${lang}`)
+      
+    // }, 500)
+    setIsLangUpdated(true);
     
   }
   const createNewFile = (e) => {
@@ -550,7 +575,7 @@ function App() {
           isLangUpdated?
           <AceEditor
           ref={codeRef}
-          onChange={updateCode}
+          // onChange={updateCode}
           mode={lang}
           theme={theme}
           name="kdslfadsf"
